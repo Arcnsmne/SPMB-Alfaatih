@@ -9,12 +9,8 @@ class WilayahController extends Controller
 {
     public function index()
     {
-        $provinces = Province::all();
-        $regencies = Regency::all();
-        $districts = District::all();
-        $villages = Village::all();
-        
-        return view('admin.wilayah.index', compact('provinces', 'regencies', 'districts', 'villages'));
+        $provinces = Province::orderBy('name')->get();
+        return view('admin.wilayah.index', compact('provinces'));
     }
 
     public function create()
@@ -112,21 +108,93 @@ class WilayahController extends Controller
 
     public function getProvinces()
     {
-        return response()->json(Province::all());
+        return response()->json(Province::orderBy('name')->get());
     }
 
     public function getRegencies($provinceId)
     {
-        return response()->json(Regency::where('province_id', $provinceId)->get());
+        return response()->json(Regency::where('province_id', $provinceId)->orderBy('name')->get());
     }
 
     public function getDistricts($regencyId)
     {
-        return response()->json(District::where('regency_id', $regencyId)->get());
+        return response()->json(District::where('regency_id', $regencyId)->orderBy('name')->get());
     }
 
     public function getVillages($districtId)
     {
-        return response()->json(Village::where('district_id', $districtId)->get());
+        return response()->json(Village::where('district_id', $districtId)->orderBy('name')->get());
+    }
+
+    public function getByLevel(Request $request)
+    {
+        $type       = $request->type;
+        $search     = $request->search;
+        $page       = $request->get('page', 1);
+        $provinceId = $request->province_id;
+        $regencyId  = $request->regency_id;
+
+        switch ($type) {
+            case 'province':
+                $query = Province::query();
+                if ($search) $query->where('name', 'like', "%{$search}%");
+                $total = $query->count();
+                $data  = $query->orderBy('name')->paginate(50, ['*'], 'page', $page);
+                $items = collect($data->items())->map(fn($r) => [
+                    'id' => $r->id, 'name' => $r->name, 'parent_name' => '-'
+                ]);
+                break;
+
+            case 'regency':
+                $query = Regency::with('province');
+                if ($provinceId) $query->where('province_id', $provinceId);
+                if ($search) $query->where('name', 'like', "%{$search}%");
+                $total = $query->count();
+                $data  = $query->orderBy('name')->paginate(50, ['*'], 'page', $page);
+                $items = collect($data->items())->map(fn($r) => [
+                    'id' => $r->id, 'name' => $r->name, 'parent_name' => $r->province->name ?? '-'
+                ]);
+                break;
+
+            case 'district':
+                $query = District::with('regency.province');
+                if ($regencyId) $query->where('regency_id', $regencyId);
+                elseif ($provinceId) $query->whereHas('regency', fn($q) => $q->where('province_id', $provinceId));
+                if ($search) $query->where('name', 'like', "%{$search}%");
+                $total = $query->count();
+                $data  = $query->orderBy('name')->paginate(50, ['*'], 'page', $page);
+                $items = collect($data->items())->map(fn($r) => [
+                    'id'           => $r->id,
+                    'name'         => $r->name,
+                    'parent_name'  => $r->regency->name ?? '-',
+                    'province_name'=> $r->regency->province->name ?? '-',
+                ]);
+                break;
+
+            case 'village':
+                $query = Village::with('district.regency.province');
+                if ($regencyId) $query->whereHas('district', fn($q) => $q->where('regency_id', $regencyId));
+                elseif ($provinceId) $query->whereHas('district.regency', fn($q) => $q->where('province_id', $provinceId));
+                if ($search) $query->where('name', 'like', "%{$search}%");
+                $total = $query->count();
+                $data  = $query->orderBy('name')->paginate(50, ['*'], 'page', $page);
+                $items = collect($data->items())->map(fn($r) => [
+                    'id'           => $r->id,
+                    'name'         => $r->name,
+                    'parent_name'  => $r->district->name ?? '-',
+                    'regency_name' => $r->district->regency->name ?? '-',
+                    'province_name'=> $r->district->regency->province->name ?? '-',
+                ]);
+                break;
+
+            default:
+                return response()->json(['data' => [], 'total' => 0, 'pages' => 0]);
+        }
+
+        return response()->json([
+            'data'  => $items,
+            'total' => $total,
+            'pages' => $data->lastPage()
+        ]);
     }
 }

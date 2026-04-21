@@ -46,7 +46,7 @@ class VerifyOTPController extends Controller
         return redirect()->route('login')->with('success', 'Akun berhasil diaktivasi! Silakan login.');
     }
 
-    public function resendOTP(Request $request)
+    public function resend(Request $request)
     {
         $request->validate(['email' => 'required|email']);
 

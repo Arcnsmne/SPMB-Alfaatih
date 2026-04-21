@@ -102,13 +102,15 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label fw-semibold">NIK <span class="text-danger">*</span></label>
-                                        <input type="text" name="nik" class="form-control form-control-lg" value="{{ old('nik') }}" maxlength="16" placeholder="16 digit NIK" required>
+                                        <input type="text" name="nik" id="nik" class="form-control form-control-lg" value="{{ old('nik') }}" maxlength="16" placeholder="16 digit NIK" inputmode="numeric" pattern="[0-9]{16}" required>
+                                        <small class="text-muted">Hanya angka, 16 digit</small>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label fw-semibold">NISN <span class="text-danger">*</span></label>
-                                        <input type="text" name="nisn" class="form-control form-control-lg" value="{{ old('nisn') }}" maxlength="10" placeholder="10 digit NISN" required>
+                                        <input type="text" name="nisn" id="nisn" class="form-control form-control-lg" value="{{ old('nisn') }}" maxlength="10" placeholder="10 digit NISN" inputmode="numeric" pattern="[0-9]{10}" required>
+                                        <small class="text-muted">Hanya angka, 10 digit</small>
                                     </div>
                                 </div>
                             </div>
@@ -152,7 +154,8 @@
                                     </div>
                                     <div class="form-group mt-2">
                                         <label class="form-label fw-semibold">No. HP Ayah <span class="text-danger">*</span></label>
-                                        <input type="tel" name="hp_ayah" class="form-control" value="{{ old('hp_ayah') }}" placeholder="Nomor telepon ayah" required>
+                                        <input type="tel" name="hp_ayah" class="form-control hp-input" value="{{ old('hp_ayah') }}" placeholder="Contoh: 08123456789" maxlength="13" inputmode="numeric" required>
+                                        <small class="text-muted">Format: 08xxxxxxxxxx (10-13 digit)</small>
                                     </div>
                                 </div>
                             </div>
@@ -185,7 +188,8 @@
                                     </div>
                                     <div class="form-group mt-2">
                                         <label class="form-label fw-semibold">No. HP Ibu <span class="text-danger">*</span></label>
-                                        <input type="tel" name="hp_ibu" class="form-control" value="{{ old('hp_ibu') }}" placeholder="Nomor telepon ibu" required>
+                                        <input type="tel" name="hp_ibu" class="form-control hp-input" value="{{ old('hp_ibu') }}" placeholder="Contoh: 08123456789" maxlength="13" inputmode="numeric" required>
+                                        <small class="text-muted">Format: 08xxxxxxxxxx (10-13 digit)</small>
                                     </div>
                                 </div>
                             </div>
@@ -205,7 +209,8 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label class="form-label fw-semibold">No. HP Wali</label>
-                                                <input type="tel" name="wali_hp" class="form-control" value="{{ old('wali_hp') }}" placeholder="Nomor telepon wali">
+                                                <input type="tel" name="wali_hp" class="form-control hp-input" value="{{ old('wali_hp') }}" placeholder="Contoh: 08123456789" maxlength="13" inputmode="numeric">
+                                                <small class="text-muted">Format: 08xxxxxxxxxx (10-13 digit)</small>
                                             </div>
                                         </div>
                                     </div>
@@ -226,7 +231,8 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label fw-semibold">NPSN Sekolah <span class="text-danger">*</span></label>
-                                        <input type="text" name="npsn" class="form-control form-control-lg" value="{{ old('npsn') }}" maxlength="8" placeholder="8 digit NPSN" required>
+                                        <input type="text" name="npsn" id="npsn" class="form-control form-control-lg" value="{{ old('npsn') }}" maxlength="8" placeholder="8 digit NPSN" inputmode="numeric" pattern="[0-9]{8}" required>
+                                        <small class="text-muted">Hanya angka, 8 digit</small>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -643,6 +649,39 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('input, select').forEach(field => {
         field.addEventListener('blur', function() {
             validateField(this);
+        });
+    });
+
+    // Block letters on numeric fields (NIK, NISN, NPSN, HP)
+    document.querySelectorAll('#nik, #nisn, #npsn, .hp-input').forEach(el => {
+        el.addEventListener('keydown', function(e) {
+            const allowed = ['Backspace','Delete','ArrowLeft','ArrowRight','Tab','Home','End'];
+            if (allowed.includes(e.key)) return;
+            if (!/^[0-9]$/.test(e.key)) e.preventDefault();
+        });
+        el.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '');
+        });
+    });
+
+    // Validate HP starts with 08
+    document.querySelectorAll('.hp-input').forEach(el => {
+        el.addEventListener('blur', function() {
+            if (this.value && !this.value.startsWith('08')) {
+                this.classList.add('is-invalid');
+                let msg = this.parentNode.querySelector('.invalid-feedback');
+                if (!msg) {
+                    msg = document.createElement('div');
+                    msg.className = 'invalid-feedback';
+                    this.parentNode.appendChild(msg);
+                }
+                msg.textContent = 'Nomor HP harus diawali 08';
+                msg.style.display = 'block';
+            } else {
+                this.classList.remove('is-invalid');
+                const msg = this.parentNode.querySelector('.invalid-feedback');
+                if (msg) msg.style.display = 'none';
+            }
         });
     });
 });

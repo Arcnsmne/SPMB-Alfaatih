@@ -22,7 +22,7 @@ class RegisterController extends Controller
         $validator = Validator::make($request->all(), [
             'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:pengguna',
-            'hp' => 'required|string|max:20',
+            'hp' => 'required|string|min:10|max:13|regex:/^08[0-9]{8,11}$/',
             'password' => 'required|string|min:6|confirmed',
         ]);
 
@@ -32,7 +32,7 @@ class RegisterController extends Controller
                 ->withInput();
         }
 
-        $otp = rand(100000, 999999);
+        // $otp = rand(100000, 999999); // OTP dinonaktifkan sementara
         
         $user = Pengguna::create([
             'nama' => $request->nama,
@@ -40,22 +40,22 @@ class RegisterController extends Controller
             'hp' => $request->hp,
             'password_hash' => Hash::make($request->password),
             'role' => 'pendaftar',
-            'aktif' => 0,
-            'otp' => $otp,
-            'otp_expired_at' => Carbon::now()->addMinutes(10),
+            'aktif' => 1, // OTP dinonaktifkan sementara
+            'otp' => null,
+            'otp_expired_at' => null,
         ]);
 
-        // Kirim OTP via email (simulasi)
-        try {
-            Mail::raw("Kode OTP Anda: {$otp}\n\nKode ini berlaku selama 10 menit.", function($message) use ($request) {
-                $message->to($request->email)
-                        ->subject('Kode OTP Verifikasi Akun SPMB 666');
-            });
-        } catch (\Exception $e) {
-            // Jika email gagal, tetap lanjut ke OTP page
-        }
+        // OTP dinonaktifkan sementara
+        // try {
+        //     Mail::raw("Kode OTP Anda: {$otp}\n\nKode ini berlaku selama 10 menit.", function($message) use ($request) {
+        //         $message->to($request->email)
+        //                 ->subject('Kode OTP Verifikasi Akun SPMB 666');
+        //     });
+        // } catch (\Exception $e) {
+        //     // Jika email gagal, tetap lanjut ke OTP page
+        // }
 
-        return redirect()->route('verify.otp', ['email' => $request->email])
-                        ->with('success', 'Registrasi berhasil! Silakan cek email untuk kode OTP.');
+        return redirect()->route('login')
+                        ->with('success', 'Registrasi berhasil! Silakan login.');
     }
 }

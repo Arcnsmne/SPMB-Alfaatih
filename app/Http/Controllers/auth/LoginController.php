@@ -30,11 +30,11 @@ class LoginController extends Controller
             return back()->withErrors(['email' => 'Email atau password salah.']);
         }
 
-        // Jika akun tidak aktif
-        if ($user->aktif != 1) {  
-            return redirect()->route('verify.otp', ['email' => $request->email])
-                           ->withErrors(['email' => 'Akun belum diverifikasi. Silakan verifikasi dengan kode OTP.']);
-        }
+        // OTP dinonaktifkan sementara
+        // if ($user->aktif != 1) {  
+        //     return redirect()->route('verify.otp', ['email' => $request->email])
+        //                    ->withErrors(['email' => 'Akun belum diverifikasi. Silakan verifikasi dengan kode OTP.']);
+        // }
 
         // Cek password
         if (!Hash::check($request->password, $user->password_hash)) {

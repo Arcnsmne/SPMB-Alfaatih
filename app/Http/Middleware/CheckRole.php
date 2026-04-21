@@ -16,13 +16,13 @@ class CheckRole
 
         $user = auth()->user();
 
-        // Cek jika user tidak aktif
-        if ($user->aktif != 1) {
-            auth()->logout();
-            return redirect()->route('login')->withErrors([
-                'email' => 'Akun Anda tidak aktif.'
-            ]);
-        }
+        // OTP dinonaktifkan sementara
+        // if ($user->aktif != 1) {
+        //     auth()->logout();
+        //     return redirect()->route('login')->withErrors([
+        //         'email' => 'Akun Anda tidak aktif.'
+        //     ]);
+        // }
 
         // Cek role
         if (!in_array($user->role, $roles)) {

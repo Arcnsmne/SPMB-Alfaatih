@@ -97,26 +97,49 @@
             </div>
         </div>
 
-        @if($pendaftar->pembayaran && $pendaftar->pembayaran->bukti_transfer)
+        @if($pendaftar->pembayaran && $pendaftar->pembayaran->bukti)
+        @php
+            $buktiUrl = asset('storage/' . $pendaftar->pembayaran->bukti);
+            $ext = strtolower(pathinfo($pendaftar->pembayaran->bukti, PATHINFO_EXTENSION));
+            $isImage = in_array($ext, ['jpg','jpeg','png','gif']);
+        @endphp
         <div class="card mt-4">
-            <div class="card-header">
-                <h4 class="card-title">Bukti Transfer</h4>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title mb-0">Bukti Transfer</h4>
+                <button class="btn btn-primary btn-sm" onclick="openPreview('{{ $buktiUrl }}', '{{ $isImage ? 'image' : 'pdf' }}')"> 
+                    <i class="bi bi-eye me-1"></i> Lihat
+                </button>
             </div>
             <div class="card-body text-center">
-                <img src="{{ asset('storage/' . $pendaftar->pembayaran->bukti_transfer) }}" 
-                     alt="Bukti Transfer" 
-                     class="img-fluid rounded border" 
-                     style="max-height: 500px;">
-                <div class="mt-3">
-                    <a href="{{ asset('storage/' . $pendaftar->pembayaran->bukti_transfer) }}" 
-                       target="_blank" 
-                       class="btn btn-outline-primary">
-                        <i class="bi bi-arrows-fullscreen me-1"></i> Lihat Full Size
-                    </a>
-                </div>
+                @if($isImage)
+                    <img src="{{ $buktiUrl }}" class="img-thumbnail" style="max-height:200px; cursor:pointer"
+                        onclick="openPreview('{{ $buktiUrl }}', 'image')"
+                        onerror="this.style.display='none'">
+                @else
+                    <i class="bi bi-file-earmark-pdf text-danger" style="font-size:4rem"></i>
+                    <p class="text-muted mt-2">File PDF</p>
+                @endif
             </div>
         </div>
         @endif
+
+        <!-- Modal Preview -->
+        <div class="modal fade" id="previewModal" tabindex="-1">
+            <div class="modal-dialog modal-xl modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Bukti Transfer</h5>
+                        <div class="ms-auto d-flex gap-2">
+                            <a id="previewDownload" href="#" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-download"></i> Unduh
+                            </a>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                    </div>
+                    <div class="modal-body p-0" id="previewContent" style="min-height:400px"></div>
+                </div>
+            </div>
+        </div>
 
         @if($pendaftar->pembayaran && $pendaftar->pembayaran->status == 'PENDING')
         <div class="card mt-4">
@@ -156,4 +179,21 @@
         @endif
     </section>
 </div>
+
+@push('scripts')
+<script>
+function openPreview(url, type) {
+    document.getElementById('previewDownload').href = url;
+    const content = document.getElementById('previewContent');
+    const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+    modal.show();
+    if (type === 'image') {
+        content.innerHTML = `<img src="${url}" class="img-fluid d-block mx-auto p-3" style="max-height:80vh;object-fit:contain"
+            onerror="this.parentElement.innerHTML='<div class=\'alert alert-warning m-3\'>Gambar tidak dapat ditampilkan. <a href=\''+url+'\' target=\'_blank\'>Buka di tab baru</a></div>'">`;
+    } else {
+        content.innerHTML = `<iframe src="${url}" width="100%" height="600px" frameborder="0"></iframe>`;
+    }
+}
+</script>
+@endpush
 @endsection

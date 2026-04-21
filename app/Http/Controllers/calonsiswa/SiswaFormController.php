@@ -31,9 +31,7 @@ class SiswaFormController extends Controller
             ]);
         }
         
-        $gelombang = Gelombang::where('tgl_mulai', '<=', now())
-                              ->where('tgl_selesai', '>=', now())
-                              ->get();
+        $gelombang = Gelombang::where('tgl_selesai', '>=', now())->orderBy('tgl_mulai')->get();
         $jurusan = Jurusan::all();
         
         return view('calon_siswa.formulir.simple', compact('gelombang', 'jurusan'));
@@ -53,17 +51,17 @@ class SiswaFormController extends Controller
             'jk' => 'required|in:L,P',
             'tmp_lahir' => 'required|string|max:255',
             'tgl_lahir' => 'required|date',
-            'nik' => 'required|string|size:16',
-            'nisn' => 'required|string|size:10',
+            'nik' => 'required|digits:16',
+            'nisn' => 'required|digits:10',
             'nama_ayah' => 'required|string|max:255',
             'pekerjaan_ayah' => 'required|string|max:255',
-            'hp_ayah' => 'required|string|min:10|max:13',
+            'hp_ayah' => 'required|string|min:10|max:13|regex:/^08[0-9]{8,11}$/',
             'nama_ibu' => 'required|string|max:255',
             'pekerjaan_ibu' => 'required|string|max:255',
-            'hp_ibu' => 'required|string|min:10|max:13',
+            'hp_ibu' => 'required|string|min:10|max:13|regex:/^08[0-9]{8,11}$/',
             'gelombang_id' => 'required|exists:gelombang,id',
             'jurusan_id' => 'required|exists:jurusan,id',
-            'npsn' => 'required|string|size:8',
+            'npsn' => 'required|digits:8',
             'nama_sekolah' => 'required|string|max:255',
             'kabupaten' => 'required|string|max:255',
             'nilai_rata' => 'required|numeric|min:0|max:100',

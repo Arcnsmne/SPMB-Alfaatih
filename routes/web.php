@@ -39,7 +39,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('gelombang', GelombangController::class);
     Route::resource('pengguna', PenggunaController::class);
     Route::resource('wilayah', WilayahController::class);
-
+    Route::get('profil', [\App\Http\Controllers\Admin\ProfilController::class, 'index'])->name('profil');
+    Route::put('profil', [\App\Http\Controllers\Admin\ProfilController::class, 'update'])->name('profil.update');
+    Route::put('profil/password', [\App\Http\Controllers\Admin\ProfilController::class, 'updatePassword'])->name('profil.password');
 });
 
 // Keuangan Routes
@@ -86,7 +88,9 @@ Route::middleware(['auth', 'role:verifikator_adm'])->prefix('verifikator_adm')->
 Route::middleware(['auth', 'role:pendaftar'])->group(function () {
     Route::get('siswa', [CalonSiswaDashboardController::class, 'index'])->name('siswa.dashboard');
     Route::get('calon-siswa', [CalonSiswaDashboardController::class, 'index'])->name('calon_siswa.dashboard');
-    Route::get('profil', function () { return view('calon_siswa.profil.index'); });
+    Route::get('profil', [\App\Http\Controllers\calonsiswa\ProfilController::class, 'index'])->name('profil.index');
+    Route::put('profil', [\App\Http\Controllers\calonsiswa\ProfilController::class, 'update'])->name('profil.update');
+    Route::put('profil/password', [\App\Http\Controllers\calonsiswa\ProfilController::class, 'updatePassword'])->name('profil.password');
     Route::get('formulir', [SiswaFormController::class, 'index'])->name('calon_siswa.formulir.simple');
     Route::post('formulir', [SiswaFormController::class, 'store'])->name('calon_siswa.formulir.store');
 
@@ -121,5 +125,6 @@ Route::prefix('api')->group(function () {
     Route::get('regencies/{provinceId}', [WilayahController::class, 'getRegencies']);
     Route::get('districts/{regencyId}', [WilayahController::class, 'getDistricts']);
     Route::get('villages/{districtId}', [WilayahController::class, 'getVillages']);
+    Route::get('wilayah/by-level', [WilayahController::class, 'getByLevel']);
 });
 

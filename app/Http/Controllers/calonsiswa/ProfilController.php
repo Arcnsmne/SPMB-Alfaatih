@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\calonsiswa;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -12,7 +12,7 @@ class ProfilController extends Controller
     public function index()
     {
         $user = Auth::user();
-        return view('admin.profil.index', compact('user'));
+        return view('calon_siswa.profil.index', compact('user'));
     }
 
     public function update(Request $request)
@@ -36,8 +36,8 @@ class ProfilController extends Controller
     public function updatePassword(Request $request)
     {
         $request->validate([
-            'password_lama'         => 'required',
-            'password'              => 'required|min:6|confirmed',
+            'password_lama' => 'required',
+            'password'      => 'required|min:6|confirmed',
         ]);
 
         $user = Auth::user();

@@ -64,7 +64,7 @@
                             </div>
                         </div>
                         <div class="form-group position-relative has-icon-left mb-2">
-                            <input type="text" name="hp" class="form-control" placeholder="No. HP" value="{{ old('hp') }}" required>
+                            <input type="tel" name="hp" id="hp" class="form-control" placeholder="No. HP (contoh: 08123456789)" value="{{ old('hp') }}" maxlength="13" inputmode="numeric" required>
                             <div class="form-control-icon">
                                 <i class="bi bi-phone"></i>
                             </div>
@@ -114,6 +114,15 @@
                 icon.classList.add('bi-eye');
             }
         }
+
+        document.getElementById('hp').addEventListener('keydown', function(e) {
+            const allowed = ['Backspace','Delete','ArrowLeft','ArrowRight','Tab','Home','End'];
+            if (allowed.includes(e.key)) return;
+            if (!/^[0-9]$/.test(e.key)) e.preventDefault();
+        });
+        document.getElementById('hp').addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '');
+        });
     </script>
 </body>
 
